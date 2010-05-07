@@ -1,0 +1,11 @@
+
+ZooKeeper Stats
+---------------
+
+Get cluster status by using the 4letterwords.
+
+Why this package?
+-----------------
+
+Base for building monitoring scripts for: ganglia, nagios, cacti
+
