@@ -1,0 +1,12 @@
+Zookeeper version: 3.4.0-941218, built on 05/05/2010 09:53 GMT
+Clients:
+ /0:0:0:0:0:0:0:1:58846[0](queued=0,recved=1,sent=0)
+
+Latency min/avg/max: 0/0/0
+Received: 1
+Sent: 1
+Outstanding: 0
+Zxid: 0x200000000
+Mode: follower
+Node count: 4
+

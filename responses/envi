@@ -1,0 +1,16 @@
+Environment:
+zookeeper.version=3.4.0-941218, built on 05/05/2010 09:53 GMT
+host.name=ubuntu.localdomain
+java.version=1.6.0_20
+java.vendor=Sun Microsystems Inc.
+java.home=/opt/jdk1.6.0_20/jre
+java.class.path=log4j.jar:zookeeper.jar:.
+java.library.path=/opt/jdk1.6.0_20/jre/lib/amd64/server:/opt/jdk1.6.0_20/jre/lib/amd64:/opt/jdk1.6.0_20/jre/../lib/amd64:/usr/java/packages/lib/amd64:/usr/lib64:/lib64:/lib:/usr/lib
+java.io.tmpdir=/tmp
+java.compiler=<NA>
+os.name=Linux
+os.arch=amd64
+os.version=2.6.32-21-generic
+user.name=andrei
+user.home=/home/andrei
+user.dir=/home/andrei/bins/test_3_servers-trunk
