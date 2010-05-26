@@ -2,15 +2,10 @@
 ZooKeeper Stats
 ---------------
 
-Get cluster status by using the 4letterwords.
-
-Why this package?
------------------
-
-Base for building monitoring scripts for: ganglia, nagios, cacti
+Get cluster status by using the 4letterwords. I'm going to use only the "mntr" command.
 
 Commands
 --------
 
-http://hadoop.apache.org/zookeeper/docs/r3.3.0/zookeeperAdmin.html#sc_zkCommands
+http://hadoop.apache.org/zookeeper/docs/current/zookeeperAdmin.html#sc_zkCommands
 

@@ -1,10 +1,9 @@
 #! /usr/bin/env python
 
-import sys
-sys.path.append('..')
-
 import unittest
-from tests import *
+
+class TestCheckZookeeper(unittest.TestCase):
+    pass
 
 if __name__ == '__main__':
     unittest.main()

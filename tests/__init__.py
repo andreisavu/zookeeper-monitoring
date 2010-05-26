@@ -1,3 +1,0 @@
-
-from tests.parser import *
-
