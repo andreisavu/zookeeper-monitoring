@@ -1,0 +1,16 @@
+zk_version  3.4.0--1, built on 05/24/2010 12:38 GMT
+zk_avg_latency  0
+zk_max_latency  0
+zk_min_latency  0
+zk_packets_received 70
+zk_packets_sent 69
+zk_outstanding_requests 0
+zk_server_state leader
+zk_node_count   4
+zk_watch_count  0
+zk_ephemerals_count 0
+zk_approximate_data_size    27
+zk_followers    4
+zk_synced_followers 4
+zk_pending_syncs    0
+
