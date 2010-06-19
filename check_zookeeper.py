@@ -18,6 +18,35 @@ __version__ = (0, 1, 0)
 log = logging.getLogger()
 logging.basicConfig(level=logging.DEBUG)
 
+class NagiosHandler(object):
+
+    @classmethod
+    def register_options(cls, parser):
+        parser.add_option('-k', '--key', dest='key') 
+        parser.add_option('-w', '--warning', dest='warning')
+        parser.add_option('-c', '--critical', dest='critical')       
+
+    def analyze(self, opts, cluster_stats):
+        pass
+
+class CactiHandler(object):
+
+    @classmethod
+    def register_options(cls, parser):
+        pass
+
+    def analyze(self, opts, cluster_stats):
+        pass
+
+class GangliaHandler(object):
+
+    @classmethod
+    def register_options(cls, parser):
+        pass
+
+    def analyze(self, opts, cluster_stats):
+        pass
+
 class ZooKeeperServer(object):
 
     def __init__(self, host='localhost', port='2181', timeout=1):
@@ -70,36 +99,6 @@ class ZooKeeperServer(object):
 
         return key, value
 
-class NagiosHandler(object):
-
-    @classmethod
-    def register_options(cls, parser):
-        parser.add_option('-k', '--key', dest='key') 
-        parser.add_option('-w', '--warning', dest='warning')
-        parser.add_option('-c', '--critical', dest='critical')       
-
-    def analyze(self, opts, cluster_stats):
-        pass
-
-class CactiHandler(object):
-
-    @classmethod
-    def register_options(cls, parser):
-        pass
-
-    def analyze(self, opts, cluster_stats):
-        pass
-
-class GangliaHandler(object):
-
-    @classmethod
-    def register_options(cls, parser):
-        pass
-
-    def analyze(self, opts, cluster_stats):
-        pass
-
-
 def main():
     opts, args = parse_cli()
 
@@ -115,15 +114,18 @@ def main():
     return handler.analyze(opts, cluster_stats)
 
 def create_handler(name):
+    """ Return an instance of a platform specific analyzer """
     try:
         return globals()['%sHandler' % name.capitalize()]()
     except KeyError:
         return None
 
 def get_all_handlers():
+    """ Get a list containing all the platform specific analyzers """
     return [NagiosHandler, CactiHandler, GangliaHandler]
 
 def dump_stats(cluster_stats):
+    """ Dump cluster statistics in an user friendly format """
     for server, stats in cluster_stats.items():
         print 'Server:', server
 
@@ -131,8 +133,8 @@ def dump_stats(cluster_stats):
             print "%30s" % key, ' ', value
         print
 
-
 def get_cluster_stats(servers):
+    """ Get stats for all the servers in the cluster """
     stats = {}
     for host, port in servers:
         try:
