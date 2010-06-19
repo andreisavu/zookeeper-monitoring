@@ -11,7 +11,7 @@ import socket
 import logging
 
 from StringIO import StringIO
-from optparse import OptionParser
+from optparse import OptionParser, OptionGroup
 
 __version__ = (0, 1, 0)
 
@@ -22,18 +22,51 @@ class NagiosHandler(object):
 
     @classmethod
     def register_options(cls, parser):
-        parser.add_option('-k', '--key', dest='key') 
-        parser.add_option('-w', '--warning', dest='warning')
-        parser.add_option('-c', '--critical', dest='critical')       
+        group = OptionGroup(parser, 'Nagios specific options')
+
+        group.add_option('-k', '--key', dest='key')
+        group.add_option('-w', '--warning', dest='warning')
+        group.add_option('-c', '--critical', dest='critical')
+
+        parser.add_option_group(group)
 
     def analyze(self, opts, cluster_stats):
-        pass
+        warning = int(opts.warning)
+        critical = int(opts.critical)
+
+        warning_state, critical_state, values = [], [], []
+        for host, stats in cluster_stats.items():
+            if opts.key in stats:
+
+                value = stats[opts.key]
+                values.append('%s=%s;%s;%s' % (host, value, warning, critical))
+
+                if warning >= value > critical or warning <= value < critical:
+                    warning_state.append(host)
+
+                elif (warning < critical and critical <= value) or (warning > critical and critical >= value):
+                    critical_state.append(host)
+
+        values = ' '.join(values)
+        if critical_state:
+            print 'Critical "%s" %s!|%s' % (opts.key, ', '.join(critical_state), values)
+            return 2
+        
+        elif warning_state:
+            print 'Warning "%s" %s!|%s' % (opts.key, ', '.join(warning_state), values)
+            return 1
+
+        else:
+            print 'Ok "%s"!|%s' % (opts.key, values)
+            return 0
 
 class CactiHandler(object):
 
     @classmethod
     def register_options(cls, parser):
-        pass
+        group = OptionGroup(parser, 'Cacti specific options')
+
+        parser.add_option_group(group)
 
     def analyze(self, opts, cluster_stats):
         pass
@@ -42,7 +75,9 @@ class GangliaHandler(object):
 
     @classmethod
     def register_options(cls, parser):
-        pass
+        group = OptionGroup(parser, 'Ganglia specific options')
+
+        parser.add_option_group(group)
 
     def analyze(self, opts, cluster_stats):
         pass
