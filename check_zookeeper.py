@@ -70,12 +70,58 @@ class ZooKeeperServer(object):
 
         return key, value
 
+class NagiosHandler(object):
+
+    @classmethod
+    def register_options(cls, parser):
+        parser.add_option('-k', '--key', dest='key') 
+        parser.add_option('-w', '--warning', dest='warning')
+        parser.add_option('-c', '--critical', dest='critical')       
+
+    def analyze(self, opts, cluster_stats):
+        pass
+
+class CactiHandler(object):
+
+    @classmethod
+    def register_options(cls, parser):
+        pass
+
+    def analyze(self, opts, cluster_stats):
+        pass
+
+class GangliaHandler(object):
+
+    @classmethod
+    def register_options(cls, parser):
+        pass
+
+    def analyze(self, opts, cluster_stats):
+        pass
+
+
 def main():
     opts, args = parse_cli()
 
+    cluster_stats = get_cluster_stats(opts.servers)
     if opts.output is None:
-        dump_stats(get_cluster_stats(opts.servers))
+        dump_stats(cluster_stats)
 
+    handler = create_handler(opts.output)
+    if handler is None:
+        log.error('undefined handler: %s' % opts.output)
+        sys.exit(1)
+
+    return handler.analyze(opts, cluster_stats)
+
+def create_handler(name):
+    try:
+        return globals()['%sHandler' % name.capitalize()]()
+    except KeyError:
+        return None
+
+def get_all_handlers():
+    return [NagiosHandler, CactiHandler, GangliaHandler]
 
 def dump_stats(cluster_stats):
     for server, stats in cluster_stats.items():
@@ -84,6 +130,7 @@ def dump_stats(cluster_stats):
         for key, value in stats.items():
             print "%30s" % key, ' ', value
         print
+
 
 def get_cluster_stats(servers):
     stats = {}
@@ -94,15 +141,20 @@ def get_cluster_stats(servers):
 
         except socket.error, e:
             # ignore because the cluster can still work even 
-            # if few servers fail completely 
+            # if some servers fail completely
+
+            # this error should be also visible in a variable
+            # exposed by the server in the statistics
 
             logging.info('unable to connect to server '\
                 '"%s" on port "%s"' % (host, port))
 
     return stats
 
+
 def get_version():
     return '.'.join(map(str, __version__))
+
 
 def parse_cli():
     parser = OptionParser(usage='./check_zookeeper.py <options>', version=get_version())
@@ -110,17 +162,11 @@ def parse_cli():
     parser.add_option('-s', '--servers', dest='servers', 
         help='a list of SERVERS', metavar='SERVERS')
 
-    parser.add_option('-k', '--key', dest='key', 
-        help='what KEY to analyze', metavar='KEY')
-
-    parser.add_option('-w', '--warning', dest='warning', 
-        help='WARNING level', metavar='WARNING')
-
-    parser.add_option('-c', '--critical', dest='critical',
-        help='CRITICAL level', metavar='CRITICAL')
-
     parser.add_option('-o', '--output', dest='output', 
         help='output HANDLER: nagios, ganglia, cacti', metavar='HANDLER')
+
+    for handler in get_all_handlers():
+        handler.register_options(parser)
 
     opts, args = parser.parse_args()
 
@@ -130,6 +176,7 @@ def parse_cli():
     opts.servers = [s.split(':') for s in opts.servers.split(',')]
 
     return (opts, args)
+
 
 if __name__ == '__main__':
     sys.exit(main())
