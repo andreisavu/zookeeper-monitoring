@@ -1,6 +1,7 @@
 #! /usr/bin/env python
 
 import unittest
+import socket
 
 from check_zookeeper import ZooKeeperServer
 
@@ -25,6 +26,35 @@ zk_avg_latency\t23
 broken-line
 
 """
+
+class SocketMock(object):
+    def __init__(self):
+        self.sent = []
+
+    def settimeout(self, timeout):
+        self.timeout = timeout
+
+    def connect(self, address):
+        self.address = address
+
+    def send(self, data):
+        self.sent.append(data)
+        return len(data)
+
+    def recv(self, size):
+        return ZK_MNTR_OUTPUT[:size]
+
+    def close(self): pass
+
+class UnableToConnectSocketMock(SocketMock):
+    def connect(self, _):
+        raise socket.error('[Errno 111] Connection refused')
+
+def create_server_mock(socket_class):
+    class ZooKeeperServerMock(ZooKeeperServer):
+        def _create_socket(self):
+            return socket_class()
+    return ZooKeeperServerMock()
 
 class TestCheckZookeeper(unittest.TestCase):
 
@@ -53,6 +83,18 @@ class TestCheckZookeeper(unittest.TestCase):
 
         self.assertEqual(len(data), 2)
 
+    def test_recv_valid_output(self):
+        zk = create_server_mock(SocketMock)
+
+        data = zk.get_stats()
+        self.assertEqual(len(data), 14)
+        self.assertEqual(data['zk_znode_count'], 4)
+
+    def test_socket_unable_to_connect(self):
+        zk = create_server_mock(UnableToConnectSocketMock)
+
+        self.assertRaises(socket.error, zk.get_stats)
+ 
 if __name__ == '__main__':
     unittest.main()
 

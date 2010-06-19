@@ -8,11 +8,15 @@ It requires ZooKeeper 3.4.0 or greater or patch ZOOKEEPER-744
 
 import sys
 import socket
+import logging
 
 from StringIO import StringIO
 from optparse import OptionParser
 
 __version__ = (0, 1, 0)
+
+log = logging.getLogger()
+logging.basicConfig(level=logging.DEBUG)
 
 class ZooKeeperServer(object):
 
@@ -22,7 +26,7 @@ class ZooKeeperServer(object):
 
     def get_stats(self):
         """ Get ZooKeeper server stats as a map """
-        s = socket.socket()
+        s = self._create_socket()
         s.settimeout(self._timeout)
 
         s.connect(self._address)
@@ -32,6 +36,9 @@ class ZooKeeperServer(object):
         s.close()
 
         return self._parse(data)
+
+    def _create_socket(self):
+        return socket.socket()
 
     def _parse(self, data):
         """ Parse the output from the 'mntr' 4letter word command """
@@ -66,13 +73,33 @@ class ZooKeeperServer(object):
 def main():
     opts, args = parse_cli()
 
+    if opts.output is None:
+        dump_stats(get_cluster_stats(opts.servers))
+
+
+def dump_stats(cluster_stats):
+    for server, stats in cluster_stats.items():
+        print 'Server:', server
+
+        for key, value in stats.items():
+            print "%30s" % key, ' ', value
+        print
+
+def get_cluster_stats(servers):
     stats = {}
-    for host, port in opts.servers:
-        zk = ZooKeeperServer(host, port)
-        stats["%s:%s" % (host, port)] = zk.get_stats()
+    for host, port in servers:
+        try:
+            zk = ZooKeeperServer(host, port)
+            stats["%s:%s" % (host, port)] = zk.get_stats()
 
-    print stats
+        except socket.error, e:
+            # ignore because the cluster can still work even 
+            # if few servers fail completely 
 
+            logging.info('unable to connect to server '\
+                '"%s" on port "%s"' % (host, port))
+
+    return stats
 
 def get_version():
     return '.'.join(map(str, __version__))
