@@ -1,11 +1,26 @@
 
-ZooKeeper Stats
----------------
+Tools and Recipes for ZooKeeper Monitoring
+------------------------------------------
 
-Get cluster status by using the 4letterwords. I'm going to use only the "mntr" command.
+This repositories contains a tools and recipes for monitoring Apache ZooKeeper.
 
-Commands
---------
+Requirements
+------------
+
+ZooKeeper 3.4.0 or later or you can apply ZOOKEEPER-744 patch over the latest 3.3.x release.
+The server should understand the 'mntr' 4letterword command. 
+
+Python 2.6 (maybe it works on previous version but it's not tested yet).
+
+Recipes
+-------
+
+My objective is to provide configuration recipes for Nagios, Cacti and Ganglia.
+
+Check the subfolders for more details regarding each platform.
+
+ZooKeeper 4letterwords Commands
+-------------------------------
 
 http://hadoop.apache.org/zookeeper/docs/current/zookeeperAdmin.html#sc_zkCommands
 
