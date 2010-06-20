@@ -47,7 +47,10 @@ ex: localhost_2182:0  localhost_2183:0  localhost_2181:0  localhost_2184:0  loca
 
 *** On Ganglia:
 
-WIP
+./check_zookeeper.py -o ganglia -s "<current-zookeeper-node>"
+
+it will use gmetric to send zookeeper node status data.
+
 
 Check the subfolders for configuration details and samples for each platform.
 

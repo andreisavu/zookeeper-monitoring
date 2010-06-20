@@ -12,6 +12,7 @@ import logging
 
 from StringIO import StringIO
 from optparse import OptionParser, OptionGroup
+from subprocess import call
 
 __version__ = (0, 1, 0)
 
@@ -111,14 +112,23 @@ class CactiHandler(object):
 
 class GangliaHandler(object):
 
+    gmetric = '/usr/bin/gmetric'
+
     @classmethod
     def register_options(cls, parser):
-        group = OptionGroup(parser, 'Ganglia specific options')
-
-        parser.add_option_group(group)
+        pass
 
     def analyze(self, opts, cluster_stats):
-        pass
+        if len(cluster_stats) != 1:
+            print >>sys.stderr, 'Only allowed to monitor a single node.'
+            return 1
+
+        for host, stats in cluster_stats.items():
+            for k, v in stats.items():
+                try:
+                    call([self.gmetric, '-n', k, '-v', str(int(v)), '-t', 'uint32'])
+                except (TypeError, ValueError):
+                    pass
 
 class ZooKeeperServer(object):
 
