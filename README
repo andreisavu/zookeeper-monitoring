@@ -21,12 +21,35 @@ The server should understand the 'mntr' 4letterword command.
 
 Python 2.6 (maybe it works on previous version but it's not tested yet).
 
-Recipes
--------
+In a nutshell
+-------------
 
-My objective is to provide configuration recipes for Nagios, Cacti and Ganglia.
+All you need is check_zookeeper.py It has no external dependencies. 
 
-Check the subfolders for more details regarding each platform.
+
+*** On Nagios call the script like this:
+
+./check_zookeeper.py -o nagios -s "<server-or-list-of-servers>" -k <key> -w <warning> -c <critical>
+
+
+*** On Cacti define a custom data input method using the script like this:
+
+./check_zookeeper.py -o cacti -s "<list-of-servers>" -k <key> --leader
+
+-- outputs a single value for the given key fetched from the cluster leader
+
+OR 
+
+./check_zookeeper.py -o cacti -s "<list-of-servers>" -k <key> 
+
+-- outputs multiple values on for each cluster node
+ex: localhost_2182:0  localhost_2183:0  localhost_2181:0  localhost_2184:0  localhost_2185:0
+
+*** On Ganglia:
+
+WIP
+
+Check the subfolders for configuration details and samples for each platform.
 
 ZooKeeper 4letterwords Commands
 -------------------------------
