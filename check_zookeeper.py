@@ -24,7 +24,6 @@ class NagiosHandler(object):
     def register_options(cls, parser):
         group = OptionGroup(parser, 'Nagios specific options')
 
-        group.add_option('-k', '--key', dest='key')
         group.add_option('-w', '--warning', dest='warning')
         group.add_option('-c', '--critical', dest='critical')
 
@@ -74,11 +73,41 @@ class CactiHandler(object):
     @classmethod
     def register_options(cls, parser):
         group = OptionGroup(parser, 'Cacti specific options')
+        
+        group.add_option('-l', '--leader', dest='leader', 
+            action="store_true", help="only query the cluster leader")
 
         parser.add_option_group(group)
 
     def analyze(self, opts, cluster_stats):
-        pass
+        if opts.key is None:
+            print >>sys.stderr, 'The key name is mandatory.'
+            return 1
+
+        if opts.leader is True:
+            try:
+                leader = [x for x in cluster_stats.values() \
+                    if x.get('zk_server_state', '') == 'leader'][0] 
+
+            except IndexError:
+                print >>sys.stderr, 'No leader found.'
+                return 3
+
+            if opts.key in leader:
+                print leader[opts.key]
+                return 0
+
+            else:
+                print >>sys.stderr, 'Unknown key: "%s"' % opts.key
+                return 2
+        else:
+            for host, stats in cluster_stats.items():
+                if opts.key not in stats: 
+                    continue
+
+                host = host.replace(':', '_')
+                print '%s:%s ' % (host, stats[opts.key]),
+
 
 class GangliaHandler(object):
 
@@ -211,6 +240,8 @@ def parse_cli():
 
     parser.add_option('-o', '--output', dest='output', 
         help='output HANDLER: nagios, ganglia, cacti', metavar='HANDLER')
+
+    parser.add_option('-k', '--key', dest='key')
 
     for handler in get_all_handlers():
         handler.register_options(parser)
