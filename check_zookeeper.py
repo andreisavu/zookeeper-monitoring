@@ -31,8 +31,17 @@ class NagiosHandler(object):
         parser.add_option_group(group)
 
     def analyze(self, opts, cluster_stats):
-        warning = int(opts.warning)
-        critical = int(opts.critical)
+        try:
+            warning = int(opts.warning)
+            critical = int(opts.critical)
+
+        except (TypeError, ValueError):
+            print >>sys.stderr, 'Invalid values for "warning" and "critical".'
+            return 2
+
+        if opts.key is None:
+            print >>sys.stderr, 'You should specify a key name.'
+            return 2
 
         warning_state, critical_state, values = [], [], []
         for host, stats in cluster_stats.items():
@@ -140,6 +149,7 @@ def main():
     cluster_stats = get_cluster_stats(opts.servers)
     if opts.output is None:
         dump_stats(cluster_stats)
+        return 0
 
     handler = create_handler(opts.output)
     if handler is None:
