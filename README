@@ -2,7 +2,16 @@
 Tools and Recipes for ZooKeeper Monitoring
 ------------------------------------------
 
-This repository contains tools and recipes for monitoring Apache ZooKeeper.
+How To Monitor
+--------------
+
+A ZooKeeper cluster can be monitored in two ways:
+ 1. by using the 'mntr' 4letterword command
+ 2. by using JMX to query the MBeans 
+
+This repo contains tools and recipes for monitoring ZooKeeper using the first method. 
+
+Check the file JMX-RESOURCE for some links to resources that could help you monitor a ZooKeeper cluster using the JMX interface. 
 
 Requirements
 ------------
