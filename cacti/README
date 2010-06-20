@@ -1,0 +1,10 @@
+
+Recipes for ZooKeeper monitoring using Cacti
+--------------------------------------------
+
+Cacti install guide: https://help.ubuntu.com/community/Cacti
+
+WARNING: I have wrote these instructions while installing and configuring the plugin on my desktop computer running Ubuntu 9.10. I've installed Nagios using apt-get.
+
+TBD
+
