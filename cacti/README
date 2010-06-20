@@ -10,7 +10,7 @@ PDF version: http://www.cacti.net/downloads/docs/pdf/manual.pdf
 Check Chapter 16: Simplest Method of Going from Script to Graph
     http://www.cacti.net/downloads/docs/html/how_to.html#SCRIPT_TO_GRAPH
 
-WARNING: I have wrote these instructions while installing and configuring the plugin on my desktop computer running Ubuntu 9.10. I've installed Nagios using apt-get.
+WARNING: I have wrote these instructions while installing and configuring the plugin on my desktop computer running Ubuntu 9.10. I've installed Cacti using apt-get.
 
 WARNING: I'm going to make the assumption that you know how to work with Cacti and how to setup Data Input Methods for custom scripts. I'm also going to assume that you have already installed Cacti and everything works as expected.
 
