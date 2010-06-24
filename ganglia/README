@@ -10,10 +10,22 @@ WARNING: I have wrote these instructions while installing and configuring the pl
 
 WARNING: I'm going to make the assumption that you know how to work with Ganglia. I'm also going to assume that you have already installed Gangli and everything works as expected.
 
+You can monitoring ZooKeeper using Ganglia in two ways:
 
-Monitoring ZooKeeper using Ganglia is a simple as calling:
+1. Using a python module:
 
-./check_zookeeper.py -o ganglia -s localhost:2181 
+    a. enable python modules: you can find instructions in modpython.confg
+    b. copy zookeeper.pyconf in /etc/ganglia/conf.d/
+    c. copy zookeeper_ganglia.py in /usr/lib/ganglia/python_plugins
+    d. restart the ganglia-monitor
 
-on each of the ZooKeeper cluster nodes. I'm making the assumption that you have already configured gmond and installed gmetric on each node.
+    This is the recommended way!
+
+2. OR Using check_zookeeper.py and gmetric:
+
+    Monitoring ZooKeeper using Ganglia is a simple as calling:
+
+    ./check_zookeeper.py -o ganglia -s localhost:2181 
+
+    on each of the ZooKeeper cluster nodes. I'm making the assumption that you have already configured gmond and installed gmetric on each node.
 
