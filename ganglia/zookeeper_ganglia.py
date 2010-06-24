@@ -1,6 +1,9 @@
 """ Python Ganglia Module for ZooKeeper monitoring 
 
 Inspired by: http://gist.github.com/448007
+
+Copy this file to /usr/lib/ganglia/python_plugins
+
 """
 
 import sys
