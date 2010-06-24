@@ -8,7 +8,7 @@ modules {
     name = "zookeeper_ganglia"
     language = "python"
     param host { value = "127.0.0.1" }
-    param port { value = 2185 }
+    param port { value = 2181 }
   }
 }
 
