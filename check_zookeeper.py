@@ -10,10 +10,10 @@ import sys
 import socket
 import logging
 import re
+import subprocess
 
 from StringIO import StringIO
 from optparse import OptionParser, OptionGroup
-from subprocess import call
 
 __version__ = (0, 1, 0)
 
@@ -119,6 +119,9 @@ class GangliaHandler(object):
     def register_options(cls, parser):
         pass
 
+    def call(self, *args, **kwargs):
+        subprocess.call(*args, **kwargs)
+
     def analyze(self, opts, cluster_stats):
         if len(cluster_stats) != 1:
             print >>sys.stderr, 'Only allowed to monitor a single node.'
@@ -127,7 +130,7 @@ class GangliaHandler(object):
         for host, stats in cluster_stats.items():
             for k, v in stats.items():
                 try:
-                    call([self.gmetric, '-n', k, '-v', str(int(v)), '-t', 'uint32'])
+                    self.call([self.gmetric, '-n', k, '-v', str(int(v)), '-t', 'uint32'])
                 except (TypeError, ValueError):
                     pass
 

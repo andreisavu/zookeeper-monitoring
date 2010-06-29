@@ -238,7 +238,24 @@ class TestCactiHandler(HandlerTestCase):
         })
         self.assertEqual(r, 0)
         self.assertEqual(self.output(), '1\n')
- 
+
+
+class TestGangliaHandler(unittest.TestCase):
+    
+    class TestableGangliaHandler(GangliaHandler):
+        def __init__(self):
+            GangliaHandler.__init__(self)
+            self.cli_calls = []
+    
+        def call(self, cli):
+            self.cli_calls.append(' '.join(cli))
+            
+    def test_send_single_metric(self):
+        h = TestGangliaHandler.TestableGangliaHandler()
+        h.analyze(None, {'localhost:2181':{'latency':10}})
+
+        cmd = "%s -n latency -v 10 -t uint32" % h.gmetric
+        assert cmd in h.cli_calls
 
 if __name__ == '__main__':
     unittest.main()
