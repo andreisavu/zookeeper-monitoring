@@ -215,6 +215,31 @@ class TestNagiosHandler(HandlerTestCase):
             'Critical "latency" s3:2181!|s1:2181=5;10;20 '\
             's3:2181=35;10;20 s2:2181=15;10;20\n')
 
+class TestCactiHandler(HandlerTestCase):
+    class Opts(object):
+        key = 'a'
+        leader = False
+
+        def __init__(self, leader=False):
+            self.leader = leader
+
+    def test_output_values_for_all_hosts(self):
+        r = CactiHandler().analyze(TestCactiHandler.Opts(), {
+            's1:2181':{'a':1},
+            's2:2181':{'a':2, 'b':3}
+        })
+        self.assertEqual(r, None)
+        self.assertEqual(self.output(), 's1_2181:1 s2_2181:2')
+    
+    def test_output_single_value_for_leader(self):
+        r = CactiHandler().analyze(TestCactiHandler.Opts(leader=True), {
+            's1:2181': {'a':1, 'zk_server_state': 'leader'},
+            's2:2181': {'a':2}
+        })
+        self.assertEqual(r, 0)
+        self.assertEqual(self.output(), '1\n')
+ 
+
 if __name__ == '__main__':
     unittest.main()
 

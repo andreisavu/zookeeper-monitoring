@@ -108,7 +108,7 @@ class CactiHandler(object):
                     continue
 
                 host = host.replace(':', '_')
-                print '%s:%s ' % (host, stats[opts.key]),
+                print '%s:%s' % (host, stats[opts.key]),
 
 
 class GangliaHandler(object):
