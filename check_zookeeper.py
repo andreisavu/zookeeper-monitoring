@@ -9,6 +9,7 @@ It requires ZooKeeper 3.4.0 or greater or patch ZOOKEEPER-744
 import sys
 import socket
 import logging
+import re
 
 from StringIO import StringIO
 from optparse import OptionParser, OptionGroup
@@ -165,6 +166,54 @@ class ZooKeeperServer(object):
                 pass # ignore broken lines
 
         return result
+
+    def _parse_stat(self, data):
+        """ Parse the output from the 'stat' 4letter word command """
+        h = StringIO(data)
+
+        result = {}
+        
+        version = h.readline()
+        if version:
+            result['zk_version'] = version[version.index(':')+1:].strip()
+
+        # skip all lines until we find the empty one
+        while h.readline().strip(): pass
+
+        for line in h.readlines():
+            m = re.match('Latency min/avg/max: (\d+)/(\d+)/(\d+)', line)
+            if m is not None:
+                result['zk_min_latency'] = int(m.group(1))
+                result['zk_avg_latency'] = int(m.group(2))
+                result['zk_max_latency'] = int(m.group(3))
+                continue
+
+            m = re.match('Received: (\d+)', line)
+            if m is not None:
+                result['zk_packets_received'] = int(m.group(1))
+                continue
+
+            m = re.match('Sent: (\d+)', line)
+            if m is not None:
+                result['zk_packets_sent'] = int(m.group(1))
+                continue
+
+            m = re.match('Outstanding: (\d+)', line)
+            if m is not None:
+                result['zk_outstanding_requests'] = int(m.group(1))
+                continue
+
+            m = re.match('Mode: (.*)', line)
+            if m is not None:
+                result['zk_server_state'] = m.group(1)
+                continue
+
+            m = re.match('Node count: (\d+)', line)
+            if m is not None:
+                result['zk_znode_count'] = int(m.group(1))
+                continue
+
+        return result 
 
     def _parse_line(self, line):
         try:

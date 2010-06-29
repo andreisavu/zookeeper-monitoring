@@ -27,6 +27,19 @@ broken-line
 
 """
 
+ZK_STAT_OUTPUT = """Zookeeper version: 3.4.0--1, built on 06/19/2010 15:07 GMT
+Clients:
+ /0:0:0:0:0:0:0:1:34564[0](queued=0,recved=1,sent=0)
+
+Latency min/avg/max: 0/40/121
+Received: 11
+Sent: 10
+Outstanding: 0
+Zxid: 0x700000003
+Mode: follower
+Node count: 4
+"""
+
 class SocketMock(object):
     def __init__(self):
         self.sent = []
@@ -82,6 +95,22 @@ class TestCheckZookeeper(unittest.TestCase):
         data = self.zk._parse(ZK_MNTR_OUTPUT_WITH_BROKEN_LINES)
 
         self.assertEqual(len(data), 2)
+
+    def test_parse_stat_valid_output(self):
+        data = self.zk._parse_stat(ZK_STAT_OUTPUT)
+
+        result = {
+            'zk_version' : '3.4.0--1, built on 06/19/2010 15:07 GMT',
+            'zk_min_latency' : 0,
+            'zk_avg_latency' : 40,
+            'zk_max_latency' : 121,
+            'zk_packets_received': 11,
+            'zk_packets_sent': 10,
+            'zk_server_state': 'follower',
+            'zk_znode_count': 4
+        }
+        for k, v in result.iteritems():
+            self.assertEqual(v, data[k])
 
     def test_recv_valid_output(self):
         zk = create_server_mock(SocketMock)
