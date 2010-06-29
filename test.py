@@ -2,8 +2,11 @@
 
 import unittest
 import socket
+import sys
 
-from check_zookeeper import ZooKeeperServer
+from StringIO import StringIO
+
+from check_zookeeper import ZooKeeperServer, NagiosHandler, CactiHandler, GangliaHandler
 
 ZK_MNTR_OUTPUT = """zk_version\t3.4.0--1, built on 06/19/2010 15:07 GMT
 zk_avg_latency\t1
@@ -140,7 +143,78 @@ class TestCheckZookeeper(unittest.TestCase):
 
         data = zk.get_stats()
         self.assertEqual(data['zk_version'], '3.3.0-943314, built on 05/11/2010 22:20 GMT')
- 
+
+class HandlerTestCase(unittest.TestCase):
+    
+    def setUp(self):
+        try:
+            sys._stdout
+        except:
+            sys._stdout = sys.stdout
+        
+        sys.stdout = StringIO()
+
+    def tearDown(self):
+        sys.stdout = sys._stdout
+
+    def output(self):
+        sys.stdout.seek(0)
+        return sys.stdout.read()
+
+
+class TestNagiosHandler(HandlerTestCase):
+
+    def _analyze(self, w, c, k, stats):
+        class Opts(object):
+            warning = w
+            critical = c
+            key = k
+
+        return NagiosHandler().analyze(Opts(), {'localhost:2181':stats})
+
+    def test_ok_status(self):
+        r = self._analyze(10, 20, 'a', {'a': 5})
+
+        self.assertEqual(r, 0)
+        self.assertEqual(self.output(), 'Ok "a"!|localhost:2181=5;10;20\n')
+
+        r = self._analyze(20, 10, 'a', {'a': 30})
+        self.assertEqual(r, 0)
+
+    def test_warning_status(self):
+        r = self._analyze(10, 20, 'a', {'a': 15})
+        self.assertEqual(r, 1)
+        self.assertEqual(self.output(), 
+            'Warning "a" localhost:2181!|localhost:2181=15;10;20\n')
+
+        r = self._analyze(20, 10, 'a', {'a': 15})
+        self.assertEqual(r, 1)
+
+    def test_critical_status(self):
+        r = self._analyze(10, 20, 'a', {'a': 30})
+        self.assertEqual(r, 2)
+        self.assertEqual(self.output(),
+            'Critical "a" localhost:2181!|localhost:2181=30;10;20\n')
+
+        r = self._analyze(20, 10, 'a', {'a': 5})
+        self.assertEqual(r, 2)
+
+    def test_check_a_specific_key_on_all_hosts(self):
+        class Opts(object):
+            warning = 10
+            critical = 20
+            key = 'latency'
+
+        r = NagiosHandler().analyze(Opts(), {
+            's1:2181': {'latency': 5},
+            's2:2181': {'latency': 15},
+            's3:2181': {'latency': 35},
+        })
+        self.assertEqual(r, 2)
+        self.assertEqual(self.output(), 
+            'Critical "latency" s3:2181!|s1:2181=5;10;20 '\
+            's3:2181=35;10;20 s2:2181=15;10;20\n')
+
 if __name__ == '__main__':
     unittest.main()
 
