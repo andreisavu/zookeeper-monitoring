@@ -27,7 +27,7 @@ broken-line
 
 """
 
-ZK_STAT_OUTPUT = """Zookeeper version: 3.4.0--1, built on 06/19/2010 15:07 GMT
+ZK_STAT_OUTPUT = """Zookeeper version: 3.3.0-943314, built on 05/11/2010 22:20 GMT
 Clients:
  /0:0:0:0:0:0:0:1:34564[0](queued=0,recved=1,sent=0)
 
@@ -58,6 +58,17 @@ class SocketMock(object):
         return ZK_MNTR_OUTPUT[:size]
 
     def close(self): pass
+
+class ZK33xSocketMock(SocketMock):
+    def __init__(self):
+        SocketMock.__init__(self)
+        self.got_stat_cmd = False
+
+    def recv(self, size):
+        if 'stat' in self.sent:
+            return ZK_STAT_OUTPUT[:size]
+        else:
+            return ''
 
 class UnableToConnectSocketMock(SocketMock):
     def connect(self, _):
@@ -100,7 +111,7 @@ class TestCheckZookeeper(unittest.TestCase):
         data = self.zk._parse_stat(ZK_STAT_OUTPUT)
 
         result = {
-            'zk_version' : '3.4.0--1, built on 06/19/2010 15:07 GMT',
+            'zk_version' : '3.3.0-943314, built on 05/11/2010 22:20 GMT',
             'zk_min_latency' : 0,
             'zk_avg_latency' : 40,
             'zk_max_latency' : 121,
@@ -123,6 +134,12 @@ class TestCheckZookeeper(unittest.TestCase):
         zk = create_server_mock(UnableToConnectSocketMock)
 
         self.assertRaises(socket.error, zk.get_stats)
+
+    def test_use_stat_cmd_if_mntr_is_not_available(self):
+        zk = create_server_mock(ZK33xSocketMock)
+
+        data = zk.get_stats()
+        self.assertEqual(data['zk_version'], '3.3.0-943314, built on 05/11/2010 22:20 GMT')
  
 if __name__ == '__main__':
     unittest.main()

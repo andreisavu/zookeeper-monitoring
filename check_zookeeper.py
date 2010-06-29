@@ -139,19 +139,28 @@ class ZooKeeperServer(object):
 
     def get_stats(self):
         """ Get ZooKeeper server stats as a map """
+        data = self._send_cmd('mntr')
+        if data:
+            return self._parse(data)
+        else:
+            data = self._send_cmd('stat')
+            return self._parse_stat(data)
+
+    def _create_socket(self):
+        return socket.socket()
+
+    def _send_cmd(self, cmd):
+        """ Send a 4letter word command to the server """
         s = self._create_socket()
         s.settimeout(self._timeout)
 
         s.connect(self._address)
-        s.send('mntr')
+        s.send(cmd)
 
         data = s.recv(2048)
         s.close()
 
-        return self._parse(data)
-
-    def _create_socket(self):
-        return socket.socket()
+        return data
 
     def _parse(self, data):
         """ Parse the output from the 'mntr' 4letter word command """
