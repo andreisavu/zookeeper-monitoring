@@ -241,7 +241,7 @@ class TestCactiHandler(HandlerTestCase):
 
 
 class TestGangliaHandler(unittest.TestCase):
-    
+
     class TestableGangliaHandler(GangliaHandler):
         def __init__(self):
             GangliaHandler.__init__(self)
@@ -251,10 +251,15 @@ class TestGangliaHandler(unittest.TestCase):
             self.cli_calls.append(' '.join(cli))
             
     def test_send_single_metric(self):
+        class Opts(object):
+            @property
+            def gmetric(self): return '/usr/bin/gmetric'
+        opts = Opts()
+        
         h = TestGangliaHandler.TestableGangliaHandler()
-        h.analyze(None, {'localhost:2181':{'latency':10}})
+        h.analyze(opts, {'localhost:2181':{'latency':10}})
 
-        cmd = "%s -n latency -v 10 -t uint32" % h.gmetric
+        cmd = "%s -n latency -v 10 -t uint32" % opts.gmetric
         assert cmd in h.cli_calls
 
 if __name__ == '__main__':

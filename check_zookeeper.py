@@ -1,9 +1,11 @@
 #! /usr/bin/env python
 """ Check Zookeeper Cluster
 
-Generic monitoring script that could be used with multiple platforms.
+Generic monitoring script that could be used with multiple platforms (Ganglia, Nagios, Cacti).
 
-It requires ZooKeeper 3.4.0 or greater or patch ZOOKEEPER-744
+It requires ZooKeeper 3.4.0 or greater. The script needs the 'mntr' 4letter word 
+command (patch ZOOKEEPER-744) that was now commited to the trunk.
+The script also works with ZooKeeper 3.3.x but in a limited way.
 """
 
 import sys
@@ -18,7 +20,7 @@ from optparse import OptionParser, OptionGroup
 __version__ = (0, 1, 0)
 
 log = logging.getLogger()
-logging.basicConfig(level=logging.DEBUG)
+logging.basicConfig(level=logging.ERROR)
 
 class NagiosHandler(object):
 
@@ -113,11 +115,15 @@ class CactiHandler(object):
 
 class GangliaHandler(object):
 
-    gmetric = '/usr/bin/gmetric'
-
     @classmethod
     def register_options(cls, parser):
-        pass
+        group = OptionGroup(parser, 'Ganglia specific options')
+
+        group.add_option('-g', '--gmetric', dest='gmetric', 
+            default='/usr/bin/gmetric', help='ganglia gmetric binary '\
+            'location: /usr/bin/gmetric')
+
+        parser.add_option_group(group)
 
     def call(self, *args, **kwargs):
         subprocess.call(*args, **kwargs)
@@ -130,7 +136,7 @@ class GangliaHandler(object):
         for host, stats in cluster_stats.items():
             for k, v in stats.items():
                 try:
-                    self.call([self.gmetric, '-n', k, '-v', str(int(v)), '-t', 'uint32'])
+                    self.call([opts.gmetric, '-n', k, '-v', str(int(v)), '-t', 'uint32'])
                 except (TypeError, ValueError):
                     pass
 
