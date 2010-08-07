@@ -1,6 +1,10 @@
-
 Tools and Recipes for ZooKeeper Monitoring
 ------------------------------------------
+
+UPDATE: This repository have been committed [1] to the ZooKeeper trunk as a contrib. You can find it under src/contrib/monitoring. Please use the ZooKeeper JIRA [2] to submit issues and feature requests. It's going to be a part of the upcoming 3.4.0 release. Thanks. 
+
+[1] https://issues.apache.org/jira/browse/ZOOKEEPER-799
+[2] https://issues.apache.org/jira/browse/ZOOKEEPER
 
 How To Monitor
 --------------
